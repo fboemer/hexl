@@ -118,7 +118,7 @@ else ()
 
     # Export logging only if we are debugging
     if (${HEXL_DEBUG})
-        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Intel")
             add_custom_command(TARGET hexl POST_BUILD
                 COMMAND ar -x $<TARGET_FILE:hexl>
                 COMMAND ar -x $<TARGET_FILE:cpu_features>
@@ -141,7 +141,7 @@ else ()
              )
         endif()
     else()
-        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Intel")
             add_custom_command(TARGET hexl POST_BUILD
                 COMMAND ar -x $<TARGET_FILE:hexl>
                 COMMAND ar -x $<TARGET_FILE:cpu_features>

@@ -11,4 +11,6 @@
 #include "hexl/util/gcc.hpp"
 #elif defined HEXL_USE_CLANG
 #include "hexl/util/clang.hpp"
+#elif defined HEXL_USE_INTEL_COMPILER
+#include "hexl/util/intel_compiler.hpp"
 #endif

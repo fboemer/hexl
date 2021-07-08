@@ -238,21 +238,21 @@ inline __m512i _mm512_hexl_small_sub_mod_epi64(__m512i x, __m512i y,
 inline __mmask8 _mm512_hexl_cmp_epu64_mask(__m512i a, __m512i b, CMPINT cmp) {
   switch (cmp) {
     case CMPINT::EQ:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::EQ));
+      return _mm512_cmp_epu64_mask(a, b, 0);
     case CMPINT::LT:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::LT));
+      return _mm512_cmp_epu64_mask(a, b, 1);
     case CMPINT::LE:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::LE));
+      return _mm512_cmp_epu64_mask(a, b, 2);
     case CMPINT::FALSE:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::FALSE));
+      return _mm512_cmp_epu64_mask(a, b, 3);
     case CMPINT::NE:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::NE));
+      return _mm512_cmp_epu64_mask(a, b, 4);
     case CMPINT::NLT:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::NLT));
+      return _mm512_cmp_epu64_mask(a, b, 5);
     case CMPINT::NLE:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::NLE));
+      return _mm512_cmp_epu64_mask(a, b, 5);
     case CMPINT::TRUE:
-      return _mm512_cmp_epu64_mask(a, b, static_cast<int>(CMPINT::TRUE));
+      return _mm512_cmp_epu64_mask(a, b, 7);
   }
   __mmask8 dummy = 0;  // Avoid end of non-void function warning
   return dummy;

@@ -6,5 +6,6 @@
 #cmakedefine HEXL_USE_MSVC
 #cmakedefine HEXL_USE_GNU
 #cmakedefine HEXL_USE_CLANG
+#cmakedefine HEXL_USE_INTEL_COMPILER
 
 #cmakedefine HEXL_DEBUG

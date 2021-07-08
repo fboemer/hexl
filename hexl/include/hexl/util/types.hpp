@@ -7,7 +7,8 @@
 
 #include "hexl/util/defines.hpp"
 
-#if defined(HEXL_USE_GNU) || defined(HEXL_USE_CLANG)
+#if defined(HEXL_USE_GNU) || defined(HEXL_USE_CLANG) || \
+    defined(HEXL_USE_INTEL_COMPILER)
 __extension__ typedef __int128 int128_t;
 __extension__ typedef unsigned __int128 uint128_t;
 #endif

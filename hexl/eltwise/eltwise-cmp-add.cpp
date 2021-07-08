@@ -127,7 +127,7 @@ void EltwiseCmpAddAVX512(uint64_t* result, const uint64_t* operand1, uint64_t n,
   __m512i* v_result_ptr = reinterpret_cast<__m512i*>(result);
   for (size_t i = n / 8; i > 0; --i) {
     __m512i v_op = _mm512_loadu_si512(v_op_ptr);
-    __m512i v_add_diff = _mm512_hexl_cmp_epi64(v_op, v_bound, cmp, diff);
+    __m512i v_add_diff = _mm512_hexl_cmp_epi64(v_op, v_bound, CMPINT::LT, diff);
     v_op = _mm512_add_epi64(v_op, v_add_diff);
     _mm512_storeu_si512(v_result_ptr, v_op);
 
