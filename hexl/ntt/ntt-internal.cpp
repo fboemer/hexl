@@ -335,21 +335,19 @@ void ForwardTransformToBitReverse64(uint64_t* operand, uint64_t n,
       const uint64_t W_op = root_of_unity_powers[m + i];
       const uint64_t W_precon = precon_root_of_unity_powers[m + i];
 
-      uint64_t* X = operand;
+      uint64_t* X = operand + j1;
       uint64_t* Y = X + t;
 
-      uint64_t tx;
-      uint64_t T;
       HEXL_LOOP_UNROLL_8
-      for (size_t j = j1; j < j2; j++) {
+      for (size_t j = 0; j < t; j++) {
         // The Harvey butterfly: assume X, Y in [0, 4q), and return X', Y'
         // in [0, 4q). Such that X', Y' = X + WY, X - WY (mod q).
         // See Algorithm 4 of https://arxiv.org/pdf/1205.2926.pdf
         HEXL_CHECK(X[j] < modulus * 4, "input X " << X[j] << " too large");
         HEXL_CHECK(Y[j] < modulus * 4, "input Y " << Y[j] << " too large");
 
-        tx = (X[j] >= twice_mod) ? (X[j] - twice_mod) : X[j];
-        T = MultiplyModLazy<64>(Y[j], W_op, W_precon, modulus);
+        uint64_t tx = (X[j] >= twice_mod) ? (X[j] - twice_mod) : X[j];
+        uint64_t T = MultiplyModLazy<64>(Y[j], W_op, W_precon, modulus);
 
         X[j] = tx + T;
         Y[j] = tx + twice_mod - T;
