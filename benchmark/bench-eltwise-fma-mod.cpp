@@ -11,6 +11,7 @@
 #include "hexl/logging/logging.hpp"
 #include "hexl/number-theory/number-theory.hpp"
 #include "hexl/util/aligned-allocator.hpp"
+#include "util/cpu-features.hpp"
 
 namespace intel {
 namespace hexl {
@@ -32,12 +33,6 @@ static void BM_EltwiseFMAModNative(benchmark::State& state) {  //  NOLINT
   }
 }
 
-BENCHMARK(BM_EltwiseFMAModNative)
-    ->Unit(benchmark::kMicrosecond)
-    ->Args({1024})
-    ->Args({4096})
-    ->Args({16384});
-
 //=================================================================
 
 #ifdef HEXL_HAS_AVX512DQ
@@ -55,12 +50,6 @@ static void BM_EltwiseFMAModAVX512DQ(benchmark::State& state) {  //  NOLINT
                                input3.data(), input_size, modulus);
   }
 }
-
-BENCHMARK(BM_EltwiseFMAModAVX512DQ)
-    ->Unit(benchmark::kMicrosecond)
-    ->Args({1024})
-    ->Args({4096})
-    ->Args({16384});
 #endif
 
 //=================================================================
@@ -80,13 +69,39 @@ static void BM_EltwiseFMAModAVX512IFMA(benchmark::State& state) {  //  NOLINT
                                input3.data(), input_size, modulus);
   }
 }
-
-BENCHMARK(BM_EltwiseFMAModAVX512IFMA)
-    ->Unit(benchmark::kMicrosecond)
-    ->Args({1024})
-    ->Args({4096})
-    ->Args({16384});
 #endif
+
+//=================================================================
+
+void register_eltwise_fma_mod_benchmarks() {
+  benchmark::RegisterBenchmark("BM_EltwiseFMAModNative", BM_EltwiseFMAModNative)
+      ->Unit(benchmark::kMicrosecond)
+      ->Args({1024})
+      ->Args({4096})
+      ->Args({16384});
+
+#ifdef HEXL_HAS_AVX512DQ
+  if (has_avx512dq) {
+    benchmark::RegisterBenchmark("BM_EltwiseFMAModAVX512DQ",
+                                 BM_EltwiseFMAModAVX512DQ)
+        ->Unit(benchmark::kMicrosecond)
+        ->Args({1024})
+        ->Args({4096})
+        ->Args({16384});
+  }
+#endif  // HEXL_HAS_AVX512DQ
+
+#ifdef HEXL_HAS_AVX512IFMA
+  if (has_avx512ifma) {
+    benchmark::RegisterBenchmark("BM_EltwiseFMAModAVX512IFMA",
+                                 BM_EltwiseFMAModAVX512IFMA)
+        ->Unit(benchmark::kMicrosecond)
+        ->Args({1024})
+        ->Args({4096})
+        ->Args({16384});
+  }
+#endif  // HEXL_HAS_AVX512IFMA
+}
 
 }  // namespace hexl
 }  // namespace intel
