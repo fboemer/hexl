@@ -102,9 +102,8 @@ jobs:
           cmake --install build
 
           # Build example
-          cd example;
-          cmake -S . -B build -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 ${{ env.DEFAULT_EXAMPLE_FLAGS }}
-
+          cd example/cmake;
+          cmake -S . -B build ${{ env.DEFAULT_EXAMPLE_FLAGS }}
           cmake --build build -j4
 
           # Run example
@@ -145,8 +144,8 @@ jobs:
           cmake --install build
 
           # Build and run example
-          cd example;
-          cmake -S . -B build ${{ env.DEFAULT_EXAMPLE_FLAGS }}
+          cd example/cmake;
+          cmake -S . -B build -DHEXL_SHARED_LIB=ON -DCMAKE_INSTALL_PREFIX=./ ${{ env.DEFAULT_EXAMPLE_FLAGS }}
           cmake --build build -j4
           build/example
           set +x
@@ -185,8 +184,8 @@ jobs:
           build/test/unit-test
 
           # Build and run example
-          cd example;
-          cmake -S . -B build -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 ${{ env.DEFAULT_EXAMPLE_FLAGS }}
+          cd example/cmake;
+          cmake -S . -B build -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_INSTALL_PREFIX=./ ${{ env.DEFAULT_EXAMPLE_FLAGS }}
           cmake --build build -j4
           build/example
           set +x
@@ -307,7 +306,7 @@ jobs:
 
           # Build example
           cd example/cmake;
-          cmake -S . -B build -DCMAKE_CXX_COMPILER=clang++-10 -DCMAKE_C_COMPILER=clang-10 ${{ env.DEFAULT_EXAMPLE_FLAGS }}
+          cmake -S . -B build ${{ env.DEFAULT_EXAMPLE_FLAGS }}
           cmake --build build -j4
 
           # Run example
@@ -368,7 +367,7 @@ jobs:
 
           # Build and run example
           cd example/cmake;
-          cmake -S . -B build ${{ env.DEFAULT_EXAMPLE_FLAGS }}
+          cmake -S . -B build -DHEXL_SHARED_LIB=ON -DCMAKE_INSTALL_PREFIX=./ ${{ env.DEFAULT_EXAMPLE_FLAGS }}
           cmake --build build -j4
           build/example
 
@@ -412,7 +411,7 @@ jobs:
 
           # Build and run example
           cd example/cmake;
-          cmake -S . -B build ${{ env.DEFAULT_EXAMPLE_FLAGS }}
+          cmake -S . -B build -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_INSTALL_PREFIX=./ ${{ env.DEFAULT_EXAMPLE_FLAGS }}
           cmake --build build -j4
           build/example
           set +x
