@@ -1,0 +1,40 @@
+Reading tracefile cov_test.info
+                                               |Lines      |Functions|Branches  
+Filename                                       |Rate    Num|Rate  Num|Rate   Num
+================================================================================
+[/home/fboemer/repos/DBIO/intel-hexl/hexl/]
+eltwise/eltwise-add-mod-avx512.cpp             | 100%    63| 100%   2|    -    0
+eltwise/eltwise-add-mod.cpp                    |58.2%    67|50.0%   4|    -    0
+eltwise/eltwise-cmp-add-avx512.cpp             | 100%    22| 100%   1|    -    0
+eltwise/eltwise-cmp-add.cpp                    |97.7%    44| 100%   2|    -    0
+eltwise/eltwise-cmp-sub-mod-avx512.cpp         | 100%    33| 100%   1|    -    0
+eltwise/eltwise-cmp-sub-mod.cpp                |96.0%    25| 100%   2|    -    0
+eltwise/eltwise-fma-mod-avx512.cpp             | 100%    49| 100%   8|    -    0
+eltwise/eltwise-fma-mod-internal.hpp           | 100%    16| 100%   4|    -    0
+eltwise/eltwise-fma-mod.cpp                    |76.7%    60| 100%   1|    -    0
+eltwise/eltwise-mult-mod-avx512dq.cpp          |99.8%   435|74.6% 193|    -    0
+eltwise/eltwise-mult-mod-avx512ifma.cpp        |77.5%   347|29.4% 320|    -    0
+eltwise/eltwise-mult-mod-internal.hpp          | 100%    19| 100%   3|    -    0
+eltwise/eltwise-mult-mod.cpp                   |75.6%    45| 100%   1|    -    0
+eltwise/eltwise-reduce-mod-avx512.cpp          | 100%    62| 100%   1|    -    0
+eltwise/eltwise-reduce-mod.cpp                 |95.3%    43| 100%   2|    -    0
+eltwise/eltwise-sub-mod-avx512.cpp             | 100%    63| 100%   2|    -    0
+eltwise/eltwise-sub-mod.cpp                    |56.9%    65|50.0%   4|    -    0
+include/hexl/ntt/ntt.hpp                       |88.6%    35|85.7%  21|    -    0
+include/hexl/number-theory/number-theory.hpp   |98.1%    52|88.2%  17|    -    0
+include/hexl/util/aligned-allocator.hpp        |85.3%    34|77.8%   9|    -    0
+include/hexl/util/allocator.hpp                |60.0%    10|25.0%  12|    -    0
+include/hexl/util/gcc.hpp                      |95.5%    22|85.7%   7|    -    0
+include/hexl/util/util.hpp                     |10.0%    20| 0.0%   1|    -    0
+ntt/fwd-ntt-avx512.cpp                         | 100%   142| 100%  22|    -    0
+ntt/inv-ntt-avx512.cpp                         | 100%   177|79.2%  24|    -    0
+ntt/ntt-avx512-util.hpp                        | 100%    98|80.0%  10|    -    0
+ntt/ntt-default.hpp                            |73.5%    49|40.0%   5|    -    0
+ntt/ntt-internal.cpp                           |86.6%   186|85.7%   7|    -    0
+ntt/ntt-radix-2.cpp                            | 100%   204| 100%   3|    -    0
+ntt/ntt-radix-4.cpp                            | 100%   239| 100%   2|    -    0
+number-theory/number-theory.cpp                |99.2%   128|92.3%  13|    -    0
+util/avx512-util.hpp                           |84.6%   162|34.1%  41|    -    0
+util/util-internal.hpp                         |89.2%    37| 100%   4|    -    0
+================================================================================
+                                         Total:|91.3%  3053|55.1% 749|    -    0

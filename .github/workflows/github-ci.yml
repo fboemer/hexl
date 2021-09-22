@@ -57,10 +57,15 @@ jobs:
       run:
         shell: bash
     steps:
-    - uses: romeovs/lcov-reporter-action@v0.2.16
+    - uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
       with:
-        lcov-file: ./cov_test.info
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path: '${{ github.workspace }}/cov_test.info'
+        min_coverage: 95
+
+    # - uses: romeovs/lcov-reporter-action@v0.2.16
+    #   with:
+    #     lcov-file: ${{ github.workspace }}/coverage.info
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # - uses: actions/checkout@v2
       # - name: Coverage build
