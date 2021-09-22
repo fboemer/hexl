@@ -58,9 +58,9 @@ jobs:
         shell: bash
     steps:
     - uses: romeovs/lcov-reporter-action@v0.2.16
-        with:
-          lcov-file: ./cov_test.info
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        lcov-file: ./cov_test.info
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
       # - uses: actions/checkout@v2
       # - name: Coverage build
