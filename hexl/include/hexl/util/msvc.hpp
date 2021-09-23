@@ -4,12 +4,16 @@
 #pragma once
 
 #ifdef HEXL_USE_MSVC
+
+#define NOMINMAX  // Avoid errors with std::min/std::max
+#undef min
+#undef max
+
 #include <immintrin.h>
 #include <intrin.h>
 #include <stdint.h>
 
 #include <cmath>
-#include <iostream>
 
 #include "hexl/util/check.hpp"
 

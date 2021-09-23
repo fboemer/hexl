@@ -5,7 +5,6 @@
 
 #include <stdint.h>
 
-#include <iostream>
 #include <limits>
 #include <vector>
 
@@ -22,7 +21,11 @@ class MultiplyFactor {
   MultiplyFactor() = default;
 
   /// @brief Computes and stores the Barrett factor floor((operand << bit_shift)
-  /// / modulus)
+  /// / modulus). This is useful when modular multiplication of the form
+  /// (x * operand) mod modulus is performed with same modulus and operand
+  /// several times. Note, passing operand=1 can be used to pre-compute a
+  /// Barrett factor for multiplications of the form (x * y) mod modulus, where
+  /// only the modulus is re-used across calls to modular multiplication.
   MultiplyFactor(uint64_t operand, uint64_t bit_shift, uint64_t modulus)
       : m_operand(operand) {
     HEXL_CHECK(operand <= modulus, "operand " << operand
@@ -50,10 +53,11 @@ class MultiplyFactor {
 /// @brief Returns whether or not num is a power of two
 inline bool IsPowerOfTwo(uint64_t num) { return num && !(num & (num - 1)); }
 
-/// @brief Returns log2(x) for x a power of 2
-inline uint64_t Log2(uint64_t x) {
-  HEXL_CHECK(IsPowerOfTwo(x), x << " not a power of 2");
-  return MSB(x);
+/// @brief Returns floor(log2(x))
+inline uint64_t Log2(uint64_t x) { return MSB(x); }
+
+inline bool IsPowerOfFour(uint64_t num) {
+  return IsPowerOfTwo(num) && (Log2(num) % 2 == 0);
 }
 
 /// @brief Returns the maximum value that can be represented using \p bits bits
@@ -152,16 +156,8 @@ inline uint64_t MultiplyModLazy(uint64_t x, uint64_t y, uint64_t modulus) {
   HEXL_CHECK(
       modulus <= MaximumValue(BitShift),
       "Modulus " << modulus << " exceeds bound " << MaximumValue(BitShift));
-  uint64_t y_hi{0};
-  uint64_t y_lo{0};
-  if (BitShift == 64) {
-    y_hi = y;
-    y_lo = 0;
-  } else if (BitShift == 52) {
-    y_hi = y >> 12;
-    y_lo = y << 52;
-  }
-  uint64_t y_barrett = DivideUInt128UInt64Lo(y_hi, y_lo, modulus);
+
+  uint64_t y_barrett = MultiplyFactor(y, BitShift, modulus).BarrettFactor();
   return MultiplyModLazy<BitShift>(x, y, y_barrett, modulus);
 }
 
@@ -179,21 +175,30 @@ inline unsigned char AddUInt64(uint64_t operand1, uint64_t operand2,
 /// @brief Returns whether or not the input is prime
 bool IsPrime(uint64_t n);
 
-/// @brief Generates a list of num_primes primes in the range [2^(bit_size,
+/// @brief Generates a list of num_primes primes in the range [2^(bit_size),
 // 2^(bit_size+1)]. Ensures each prime q satisfies
 // q % (2*ntt_size+1)) == 1
 /// @param[in] num_primes Number of primes to generate
 /// @param[in] bit_size Bit size of each prime
+/// @param[in] prefer_small_primes When true, returns primes starting from
+/// 2^(bit_size); when false, returns primes starting from 2^(bit_size+1)
 /// @param[in] ntt_size N such that each prime q satisfies q % (2N) == 1. N must
-/// be a power of two
+/// be a power of two less than 2^bit_size.
 std::vector<uint64_t> GeneratePrimes(size_t num_primes, size_t bit_size,
+                                     bool prefer_small_primes,
                                      size_t ntt_size = 1);
 
 /// @brief Returns input mod modulus, computed via 64-bit Barrett reduction
 /// @param[in] input
 /// @param[in] modulus
 /// @param[in] q_barr floor(2^64 / modulus)
-uint64_t BarrettReduce64(uint64_t input, uint64_t modulus, uint64_t q_barr);
+inline uint64_t BarrettReduce64(uint64_t input, uint64_t modulus,
+                                uint64_t q_barr) {
+  HEXL_CHECK(modulus != 0, "modulus == 0");
+  uint64_t q = MultiplyUInt64Hi<64>(input, q_barr);
+  uint64_t q_times_input = input - q * modulus;
+  return q_times_input >= modulus ? q_times_input - modulus : q_times_input;
+}
 
 /// @brief Returns x mod modulus, assuming x < InputModFactor * modulus
 /// @param[in] x

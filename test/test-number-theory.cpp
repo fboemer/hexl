@@ -13,7 +13,11 @@ namespace hexl {
 TEST(NumberTheory, Log2) {
   ASSERT_EQ(0, Log2(1));
   ASSERT_EQ(1, Log2(2));
+  ASSERT_EQ(1, Log2(3));
   ASSERT_EQ(2, Log2(4));
+  ASSERT_EQ(2, Log2(5));
+  ASSERT_EQ(2, Log2(6));
+  ASSERT_EQ(2, Log2(7));
   ASSERT_EQ(3, Log2(8));
   ASSERT_EQ(4, Log2(16));
   ASSERT_EQ(5, Log2(32));
@@ -21,7 +25,9 @@ TEST(NumberTheory, Log2) {
   ASSERT_EQ(7, Log2(128));
   ASSERT_EQ(8, Log2(256));
   ASSERT_EQ(9, Log2(512));
+  ASSERT_EQ(9, Log2(1023));
   ASSERT_EQ(10, Log2(1024));
+  ASSERT_EQ(10, Log2(1025));
   ASSERT_EQ(11, Log2(2048));
   ASSERT_EQ(12, Log2(4096));
   ASSERT_EQ(13, Log2(8192));
@@ -128,6 +134,21 @@ TEST(NumberTheory, IsPowerOfTwo) {
 
   for (auto not_power_of_two : not_powers_of_two) {
     EXPECT_FALSE(IsPowerOfTwo(not_power_of_two));
+  }
+}
+
+TEST(NumberTheory, IsPowerOfFour) {
+  std::vector<uint64_t> powers_of_four{1,    4,    16,    64,   256,
+                                       1024, 4096, 16384, 65536};
+  std::vector<uint64_t> not_powers_of_four{0, 2,  3,  5,  7,    8,
+                                           9, 31, 32, 33, 1025, 4095};
+
+  for (auto power_of_four : powers_of_four) {
+    EXPECT_TRUE(IsPowerOfFour(power_of_four));
+  }
+
+  for (auto not_power_of_four : not_powers_of_four) {
+    EXPECT_FALSE(IsPowerOfFour(not_power_of_four));
   }
 }
 
@@ -315,7 +336,17 @@ TEST(NumberTheory, IsPrime) {
 
 TEST(NumberTheory, GeneratePrimes) {
   for (int bit_size = 40; bit_size < 62; ++bit_size) {
-    std::vector<uint64_t> primes = GeneratePrimes(10, bit_size, 4096);
+    std::vector<uint64_t> primes = GeneratePrimes(10, bit_size, true, 4096);
+    ASSERT_EQ(primes.size(), 10);
+    for (const auto& prime : primes) {
+      ASSERT_EQ(prime % 8192, 1);
+      ASSERT_TRUE(IsPrime(prime));
+      ASSERT_TRUE(prime <= (1ULL << (bit_size + 1)));
+      ASSERT_TRUE(prime >= (1ULL << bit_size));
+    }
+  }
+  for (int bit_size = 40; bit_size < 62; ++bit_size) {
+    std::vector<uint64_t> primes = GeneratePrimes(10, bit_size, false, 4096);
     ASSERT_EQ(primes.size(), 10);
     for (const auto& prime : primes) {
       ASSERT_EQ(prime % 8192, 1);

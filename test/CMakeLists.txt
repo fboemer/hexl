@@ -12,7 +12,15 @@ set(NATIVE_TEST_SRC main.cpp
     test-eltwise-reduce-mod.cpp
     test-eltwise-sub-mod.cpp
     test-ntt.cpp
+    test-util-internal.cpp
 )
+
+if (HEXL_EXPERIMENTAL)
+    list(APPEND NATIVE_TEST_SRC
+        experimental/seal/test-ckks-multiply.cpp
+        experimental/seal/test-ckks-switch-key.cpp
+    )
+endif()
 
 set(AVX512_TEST_SRC
     test-avx512-util.cpp
@@ -33,12 +41,13 @@ add_executable(unit-test ${TEST_SRC})
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(unit-test PRIVATE -Wall -Wextra -march=native)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # Workaround for unresolved symbols, shouldn't be needed
-    if (HEXL_DEBUG)
-        target_link_libraries(unit-test PRIVATE gflags)
-    endif()
-    # Disable inline, due to incorect optimization in ExtractValues, causing failing tests in Windows AVX512 in Release mode with HEXL_DEBUG=OFF
-    target_compile_options(unit-test PRIVATE /Wall /W4 /Zc:preprocessor /Ob0)
+    # Disable inline, due to incorrect optimization in ExtractValues, causing failing tests in Windows AVX512 in Release mode with HEXL_DEBUG=OFF
+    target_compile_options(unit-test PRIVATE /Wall /W4 /Ob0
+        /wd4127 # warning C4127: conditional expression is constant; C++11 doesn't support if constexpr
+        /wd4389 # warning C4389: signed/unsigned mismatch from gtest
+        /wd5105 # warning C5105: macro expansion producing 'defined' has undefined behavior
+    )
+    target_compile_definitions(unit-test PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 endif()
 
 target_include_directories(unit-test PRIVATE

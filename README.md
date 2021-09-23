@@ -1,3 +1,5 @@
+[![Build and Test](https://github.com/intel/hexl/actions/workflows/github-ci.yml/badge.svg?branch=main)](https://github.com/intel/hexl/actions/workflows/github-ci.yml)
+
 # Intel Homomorphic Encryption Acceleration Library (HEXL)
 Intel:registered: HEXL is an open-source library which provides efficient implementations of integer arithmetic on Galois fields. Such arithmetic is prevalent in cryptography, particularly in homomorphic encryption (HE) schemes. Intel HEXL targets integer arithmetic with word-sized primes, typically 40-60 bits. Intel HEXL provides an API for 64-bit unsigned integers and targets Intel CPUs. For more details on Intel HEXL, see our [whitepaper](https://arxiv.org/abs/2103.16400.pdf)
 
@@ -9,6 +11,8 @@ Intel:registered: HEXL is an open-source library which provides efficient implem
     - [Dependencies](#dependencies)
     - [Compile-time options](#compile-time-options)
     - [Compiling Intel HEXL](#compiling-intel-hexl)
+      - [Linux and Mac](#linux-and-mac)
+      - [Windows](#windows)
   - [Testing Intel HEXL](#testing-intel-hexl)
   - [Benchmarking Intel HEXL](#benchmarking-intel-hexl)
   - [Using Intel HEXL](#using-intel-hexl)
@@ -18,7 +22,7 @@ Intel:registered: HEXL is an open-source library which provides efficient implem
 - [Documentation](#documentation)
 - [Contributing](#contributing)
   - [Repository layout](#repository-layout)
-  - [Citing Intel HEXL](#citing-intel-hexl)
+- [Citing Intel HEXL](#citing-intel-hexl)
     - [Version 1.2](#version-12)
     - [Version 1.1](#version-11)
     - [Version 1.0](#version-10)
@@ -41,13 +45,13 @@ For additional functionality, see the public headers, located in `include/hexl`
 
 ## Building Intel HEXL
 
-Intel HEXL can be built in several ways. Intel HEXL has been uploaded to the [Microsoft vcpkg](https://github.com/microsoft/vcpkg) C++ package manager, which supports Linux, macOS, and Windows builds. See the vcpkg repository for instructions to build Intel HEXL with vcpkg, e.g. run `vcpkg install hexl`. There may be some delay in uploading porting the latest release to vcpkg, so please build from source to use the latest change in Intel HEXL.
+Intel HEXL can be built in several ways. Intel HEXL has been uploaded to the [Microsoft vcpkg](https://github.com/microsoft/vcpkg) C++ package manager, which supports Linux, macOS, and Windows builds. See the vcpkg repository for instructions to build Intel HEXL with vcpkg, e.g. run `vcpkg install hexl`. There may be some delay in uploading latest release ports to vcpkg. Intel HEXL provides port files to build the latest version with vcpkg. For a static build, run `vcpkg install hexl --overlay-ports=/path/to/hexl/port/hexl --head`. For dynamic build, use the custom triplet file and run `vcpkg install hexl:hexl-dynamic-build --overlay-ports=/path/to/hexl/port/hexl --head --overlay-triplets=/path/to/hexl/port/hexl`. For detailed explanation, see [instruction](https://devblogs.microsoft.com/cppblog/registries-bring-your-own-libraries-to-vcpkg/) for building vcpkg port using overlays and use of [custom triplet](https://github.com/microsoft/vcpkg/blob/master/docs/examples/overlay-triplets-linux-dynamic.md#building-dynamic-libraries-on-linux) provided by vcpkg.
 
 Intel HEXL also supports a build using the CMake build system. See below for the instructions to build Intel HEXL from source using CMake.
 
 ### Dependencies
 We have tested Intel HEXL on the following operating systems:
-- Ubuntu 18.04
+- Ubuntu 20.04
 - macOS 10.15
 - Microsoft Windows 10
 
@@ -58,8 +62,7 @@ Intel HEXL requires the following dependencies:
 | CMake       | >= 3.5.1                                     |
 | Compiler    | gcc >= 7.0, clang++ >= 5.0, MSVC >= 2019     |
 
-For best performance, we recommend using a processor with AVX512-IFMA52 support, and a recent compiler (gcc >= 8.0, clang++ >= 6.0). To determine if your process supports AVX512-IFMA52, simply look for `HEXL_HAS_AVX512IFMA` during the configure step (see [Compiling Intel HEXL](#compiling-hexl)).
-
+For best performance, we recommend compiling with clang++-12. We also recommend using a processor with Intel AVX512DQ support, with best performance on processors supporting Intel AVX512-IFMA52. To determine if your processor supports AVX512-IFMA52, simply look for `HEXL_HAS_AVX512IFMA` during the configure step (see [Compiling Intel HEXL](#compiling-intel-hexl)).
 
 ### Compile-time options
 In addition to the standard CMake build options, Intel HEXL supports several compile-time flags to configure the build.
@@ -75,9 +78,11 @@ For convenience, they are listed below:
 | HEXL_TREAT_WARNING_AS_ERROR   | ON / OFF (default OFF) | Set to ON to treat all warnings as error                                 |
 
 ### Compiling Intel HEXL
-The instructions to build Intel HEXL are common between Linux, MacOS, and Windows.
+To compile Intel HEXL from source code, first clone the repository and change directories to the where the source has been cloned.
+#### Linux and Mac
+The instructions to build Intel HEXL are common to Linux and MacOS.
 
-To compile Intel HEXL from source code, first clone the repository into your current directory. Then, to configure the build, call
+Then, to configure the build, call
 ```bash
 cmake -S . -B build
 ```
@@ -100,6 +105,30 @@ To use a non-standard installation directory, configure the build with
 ```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=/path/to/install
 ```
+before proceeding with the build and installation directions above.
+
+#### Windows
+To compile Intel HEXL on Windows using Visual Studio in Release mode, configure the build via
+```bash
+cmake -S . -B build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release
+```
+adding the desired compile-time options with a `-D` flag (see [Compile-time options](#compile-time-options)).
+
+To specify the desired build configuration, pass either `--config Debug` or `--config Release` to the build step and install steps. For instance, to build Intel HEXL in Release mode, call
+```bash
+cmake --build build --config Release
+```
+This will build the Intel HEXL library in the `build/hexl/lib/` or `build/hexl/Release/lib` directory.
+
+To install Intel HEXL to the installation directory, run
+```bash
+cmake --build build --target install --config Release
+```
+To use a non-standard installation directory, configure the build with
+```bash
+cmake -S . -B build -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/path/to/install
+```
+before proceeding with the build and installation directions above.
 
 ## Testing Intel HEXL
 To run a set of unit tests via Googletest, configure and build Intel HEXL with `-DHEXL_TESTING=ON` (see [Compile-time options](#compile-time-options)).
@@ -107,28 +136,37 @@ Then, run
 ```bash
 cmake --build build --target unittest
 ```
-The unit-test executable itself is located at `build/test/unit-test`
+The unit-test executable itself is located at `build/test/unit-test` on Linux and Mac, and at `build\test\Release\unit-test.exe` or `build\test\Debug\unit-test.exe` on Windows.
 ## Benchmarking Intel HEXL
 To run a set of benchmarks via Google benchmark, configure and build Intel HEXL with `-DHEXL_BENCHMARK=ON` (see [Compile-time options](#compile-time-options)).
 Then, run
 ```bash
 cmake --build build --target bench
 ```
-The benchmark executable itself is located at `build/benchmark/bench_hexl`
+On Windows, run
+```bash
+cmake --build build --target bench --config Release
+```
+
+The benchmark executable itself is located at `build/benchmark/bench_hexl` on Linux and Mac, and at `build\benchmark\Debug\bench_hexl.exe` or `build\benchmark\Release\bench_hexl.exe` on Windows.
 
 ## Using Intel HEXL
 The `example` folder has an example of using Intel HEXL in a third-party project.
 
 ## Debugging
-For optimal performance, Intel HEXL does not perform input validation. In many cases the time required for the validation would be longer than the execution of the function itself. To debug Intel HEXL, configure and build Intel HEXL with `-DCMAKE_BUILD_TYPE=Debug` (see [Compile-time options](#compile-time-options)). This will generate a debug version of the library, e.g. `libhexl.a`, that can be used to debug the execution.
+For optimal performance, Intel HEXL does not perform input validation. In many cases the time required for the validation would be longer than the execution of the function itself. To debug Intel HEXL, configure and build Intel HEXL with `-DCMAKE_BUILD_TYPE=Debug` (see [Compile-time options](#compile-time-options)). This will generate a debug version of the library, e.g. `libhexl_debug.a`, that can be used to debug the execution. In Debug mode, Intel HEXL will also link against [Address Sanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer).
 
 **Note**, enabling `CMAKE_BUILD_TYPE=Debug` will result in a significant runtime overhead.
+
+To enable verbose logging for the benchmarks or unit-tests in a Debug build, add the log level as a command-line argument, e.g. `build/benchmark/bench_hexl --v=9`. See [easyloggingpp's documentation](https://github.com/amrayn/easyloggingpp#application-arguments) for more details.
+
 ## Threading
 Intel HEXL is single-threaded and thread-safe.
 
 # Community Adoption
 
 Intel HEXL has been integrated to the following homomorphic encryption libraries:
+- [HElib](https://github.com/homenc/HElib)
 - [Microsoft SEAL](https://github.com/microsoft/SEAL)
 - [PALISADE](https://gitlab.com/palisade/palisade-release)
 
@@ -148,7 +186,7 @@ Then, configure Intel HEXL with `-DHEXL_DOCS=ON` (see [Compile-time options](#co
 ```
 cmake --build build --target docs
 ```
-To view the generated Doxygen documentation, open the generated `build/docs/doxygen/html/index.html` file in a web browser.
+To view the generated Doxygen documentation, open the generated `docs/doxygen/html/index.html` file in a web browser.
 
 # Contributing
 This project welcomes external contributions. To contribute to Intel HEXL, see [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -158,16 +196,16 @@ We encourage feedback and suggestions via [Github Issues](https://github.com/int
 Public headers reside in the `hexl/include` folder.
 Private headers, e.g. those containing Intel(R) AVX-512 code should not be put in this folder.
 
-
 # Citing Intel HEXL
 To cite Intel HEXL, please use the following BibTeX entry.
 
 ### Version 1.2
 ```tex
     @misc{IntelHEXL,
+        author={Boemer, Fabian and Kim, Sejun and Seifu, Gelila and de Souza, Fillipe DM and Gopal, Vinodh and others},
         title = {{I}ntel {HEXL} (release 1.2)},
-        howpublished = {\url{https://arxiv.org/abs/2103.16400}},
-        month = july,
+        howpublished = {\url{https://github.com/intel/hexl}},
+        month = september,
         year = 2021,
         key = {Intel HEXL}
     }
@@ -176,8 +214,9 @@ To cite Intel HEXL, please use the following BibTeX entry.
 ### Version 1.1
 ```tex
     @misc{IntelHEXL,
+        author={Boemer, Fabian and Kim, Sejun and Seifu, Gelila and de Souza, Fillipe DM and Gopal, Vinodh and others},
         title = {{I}ntel {HEXL} (release 1.1)},
-        howpublished = {\url{https://arxiv.org/abs/2103.16400}},
+        howpublished = {\url{https://github.com/intel/hexl}},
         month = may,
         year = 2021,
         key = {Intel HEXL}
@@ -187,8 +226,9 @@ To cite Intel HEXL, please use the following BibTeX entry.
 ### Version 1.0
 ```tex
     @misc{IntelHEXL,
+        author={Boemer, Fabian and Kim, Sejun and Seifu, Gelila and de Souza, Fillipe DM and Gopal, Vinodh and others},
         title = {{I}ntel {HEXL} (release 1.0)},
-        howpublished = {\url{https://arxiv.org/abs/2103.16400}},
+        howpublished = {\url{https://github.com/intel/hexl}},
         month = april,
         year = 2021,
         key = {Intel HEXL}
@@ -210,3 +250,6 @@ The Intel contributors to this project, sorted by last name, are
   - [Nir Peled](https://www.linkedin.com/in/nir-peled-4a52266/)
   - [Kylan Race](https://www.linkedin.com/in/kylanrace/)
   - [Gelila Seifu](https://www.linkedin.com/in/gelila-seifu/)
+
+In addition to the Intel contributors listed, we are also grateful to contributions to this project that are not reflected in the Git history:
+  - [Antonis Papadimitriou](https://www.linkedin.com/in/apapadimitriou/)

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.5.1)
-project(HEXL VERSION 1.2.0 LANGUAGES C CXX)
+project(HEXL VERSION 1.2.1 LANGUAGES C CXX)
 
 include(CheckCCompilerFlag)
 include(CheckCXXCompilerFlag)
@@ -56,6 +56,7 @@ set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 option(HEXL_BENCHMARK "Enable benchmarking" ON)
 option(HEXL_COVERAGE "Enables coverage for unit tests" OFF)
 option(HEXL_DOCS "Enable documentation building" OFF)
+option(HEXL_EXPERIMENTAL "Enable experimental features" OFF)
 option(HEXL_SHARED_LIB "Generate a shared library" OFF)
 option(HEXL_TESTING "Enables unit-tests" ON)
 option(HEXL_TREAT_WARNING_AS_ERROR "Treat all compile-time warnings as errors" OFF)
@@ -67,6 +68,7 @@ message(STATUS "HEXL_BENCHMARK:                ${HEXL_BENCHMARK}")
 message(STATUS "HEXL_COVERAGE:                 ${HEXL_COVERAGE}")
 message(STATUS "HEXL_DEBUG:                    ${HEXL_DEBUG}")
 message(STATUS "HEXL_DOCS:                     ${HEXL_DOCS}")
+message(STATUS "HEXL_EXPERIMENTAL:             ${HEXL_EXPERIMENTAL}")
 message(STATUS "HEXL_SHARED_LIB:               ${HEXL_SHARED_LIB}")
 message(STATUS "HEXL_TESTING:                  ${HEXL_TESTING}")
 message(STATUS "HEXL_TREAT_WARNING_AS_ERROR:   ${HEXL_TREAT_WARNING_AS_ERROR}")
@@ -132,20 +134,12 @@ message(STATUS "CMAKE_INSTALL_LIBDIR:     ${CMAKE_INSTALL_LIBDIR}")
 message(STATUS "CMAKE_INSTALL_INCLUDEDIR: ${CMAKE_INSTALL_INCLUDEDIR}")
 message(STATUS "CMAKE_INSTALL_PREFIX:     ${CMAKE_INSTALL_PREFIX}")
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig/hexl.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig/hexl.pc @ONLY)
-
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig/hexl.pc)
-    install(
-        FILES ${CMAKE_CURRENT_SOURCE_DIR}/pkgconfig/hexl.pc
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
-endif()
-
 #------------------------------------------------------------------------------
 # Third-party code...
 #------------------------------------------------------------------------------
 find_package(CpuFeatures CONFIG)
 if (NOT CpuFeatures_FOUND)
-  message(STATUS "CpuFeatures: not found")
+  message(STATUS "CpuFeatures: pre-installed CpuFeatures not found")
   add_subdirectory(cmake/third-party/cpu-features)
 else()
   message(STATUS "CpuFeatures: found")
@@ -155,7 +149,6 @@ else()
     CpuFeatures::cpu_features
     INTERFACE_INCLUDE_DIRECTORIES)
 endif()
-
 
 if (HEXL_TESTING OR HEXL_BENCHMARK OR HEXL_DEBUG)
   if(NOT TARGET Threads::Threads)
@@ -173,8 +166,18 @@ if (HEXL_BENCHMARK)
 endif()
 
 if (HEXL_DEBUG)
-  add_subdirectory(cmake/third-party/easylogging)
-  add_subdirectory(cmake/third-party/gflags)
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/third-party/easylogging")
+  find_package(EASYLOGGINGPP MODULE)
+  if (EASYLOGGINGPP_FOUND)
+    message(STATUS "easyloggingpp: pre-installed easyloggingpp found")
+    get_target_property(
+      EASYLOGGINGPP_INCLUDE_DIR
+      easyloggingpp
+      INTERFACE_INCLUDE_DIRECTORIES)
+  else()
+    message(STATUS "easyloggingpp: pre-installed easyloggingpp NOT found, building from source")
+    add_subdirectory(cmake/third-party/easylogging)
+  endif()
 endif()
 
 #------------------------------------------------------------------------------

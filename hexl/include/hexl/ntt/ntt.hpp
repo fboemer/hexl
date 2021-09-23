@@ -37,10 +37,10 @@ class NTT {
   };
 
   /// @brief Initializes an empty NTT object
-  NTT();
+  NTT() = default;
 
   /// @brief Destructs the NTT object
-  ~NTT();
+  ~NTT() = default;
 
   /// @brief Initializes an NTT object with degree \p degree and modulus \p q.
   /// @param[in] degree also known as N. Size of the NTT transform. Must be a
@@ -82,6 +82,12 @@ class NTT {
             std::static_pointer_cast<AllocatorBase>(
                 std::make_shared<AllocatorAdapter<Allocator, AllocatorArgs...>>(
                     std::move(a), std::forward<AllocatorArgs>(args)...))) {}
+
+  /// @brief Returns true if arguments satisfy constraints for negacyclic NTT
+  /// @param[in] degree N. Size of the transform, i.e. the polynomial degree.
+  /// Must be a power of two.
+  /// @param[in] modulus Prime modulus q. Must satisfy q mod 2N = 1
+  static bool CheckArguments(uint64_t degree, uint64_t modulus);
 
   /// @brief Compute forward NTT. Results are bit-reversed.
   /// @param[out] result Stores the result
@@ -188,10 +194,10 @@ class NTT {
   }
 
   /// @brief Maximum power of 2 in degree
-  static const size_t s_max_degree_bits{20};
+  static size_t MaxDegreeBits() { return 20; }
 
   /// @brief Maximum number of bits in modulus;
-  static const size_t s_max_modulus_bits{62};
+  static size_t MaxModulusBits() { return 62; }
 
   /// @brief Default bit shift used in Barrett precomputation
   static const size_t s_default_shift_bits{64};
@@ -224,8 +230,8 @@ class NTT {
 
   uint64_t m_degree_bits;  // log_2(m_degree)
 
-  uint64_t m_winv;  // Inverse of minimal root of unity
-  uint64_t m_w;     // A 2N'th root of unity
+  uint64_t m_w_inv;  // Inverse of minimal root of unity
+  uint64_t m_w;      // A 2N'th root of unity
 
   std::shared_ptr<AllocatorBase> m_alloc;
 

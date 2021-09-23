@@ -3,10 +3,9 @@
 
 #include "hexl/number-theory/number-theory.hpp"
 
-#include <random>
-
 #include "hexl/logging/logging.hpp"
 #include "hexl/util/check.hpp"
+#include "util/util-internal.hpp"
 
 namespace intel {
 namespace hexl {
@@ -40,13 +39,6 @@ uint64_t InverseMod(uint64_t input, uint64_t modulus) {
   if (x < 0) x += m0;
 
   return uint64_t(x);
-}
-
-uint64_t BarrettReduce64(uint64_t input, uint64_t modulus, uint64_t q_barr) {
-  HEXL_CHECK(modulus != 0, "modulus == 0");
-  uint64_t q = MultiplyUInt64Hi<64>(input, q_barr);
-  uint64_t q_times_input = input - q * modulus;
-  return q_times_input >= modulus ? q_times_input - modulus : q_times_input;
 }
 
 uint64_t MultiplyMod(uint64_t x, uint64_t y, uint64_t modulus) {
@@ -112,9 +104,6 @@ bool IsPrimitiveRoot(uint64_t root, uint64_t degree, uint64_t modulus) {
 // Tries to return a primitive degree-th root of unity
 // throw error if no root is found
 uint64_t GeneratePrimitiveRoot(uint64_t degree, uint64_t modulus) {
-  std::default_random_engine generator;
-  std::uniform_int_distribution<uint64_t> distribution(0, modulus - 1);
-
   // We need to divide modulus-1 by degree to get the size of the quotient group
   uint64_t size_entire_group = modulus - 1;
 
@@ -122,7 +111,7 @@ uint64_t GeneratePrimitiveRoot(uint64_t degree, uint64_t modulus) {
   uint64_t size_quotient_group = size_entire_group / degree;
 
   for (int trial = 0; trial < 200; ++trial) {
-    uint64_t root = distribution(generator);
+    uint64_t root = GenerateInsecureUniformRandomValue(0, modulus);
     root = PowMod(root, size_quotient_group, modulus);
 
     if (IsPrimitiveRoot(root, degree, modulus)) {
@@ -223,6 +212,7 @@ bool IsPrime(uint64_t n) {
 }
 
 std::vector<uint64_t> GeneratePrimes(size_t num_primes, size_t bit_size,
+                                     bool prefer_small_primes,
                                      size_t ntt_size) {
   HEXL_CHECK(num_primes > 0, "num_primes == 0");
   HEXL_CHECK(IsPowerOfTwo(ntt_size),
@@ -231,18 +221,39 @@ std::vector<uint64_t> GeneratePrimes(size_t num_primes, size_t bit_size,
              "log2(ntt_size) " << Log2(ntt_size)
                                << " should be less than bit_size " << bit_size);
 
-  uint64_t value = (1ULL << bit_size) + 1;
+  int64_t prime_lower_bound = (1LL << bit_size) + 1LL;
+  int64_t prime_upper_bound = (1LL << (bit_size + 1LL)) - 1LL;
+
+  // Keep signed to enable negative step
+  int64_t prime_candidate =
+      prefer_small_primes
+          ? prime_lower_bound
+          : prime_upper_bound - (prime_upper_bound % (2 * ntt_size)) + 1;
+  HEXL_CHECK(prime_candidate % (2 * ntt_size) == 1, "bad prime candidate");
+
+  // Ensure prime % 2 * ntt_size == 1
+  int64_t prime_candidate_step =
+      (prefer_small_primes ? 1 : -1) * 2 * static_cast<int64_t>(ntt_size);
+
+  auto continue_condition = [&](int64_t local_candidate_prime) {
+    if (prefer_small_primes) {
+      return local_candidate_prime < prime_upper_bound;
+    } else {
+      return local_candidate_prime > prime_lower_bound;
+    }
+  };
 
   std::vector<uint64_t> ret;
 
-  while (value < (1ULL << (bit_size + 1))) {
-    if (IsPrime(value)) {
-      ret.emplace_back(value);
+  while (continue_condition(prime_candidate)) {
+    if (IsPrime(prime_candidate)) {
+      HEXL_CHECK(prime_candidate % (2 * ntt_size) == 1, "bad prime candidate");
+      ret.emplace_back(static_cast<uint64_t>(prime_candidate));
       if (ret.size() == num_primes) {
         return ret;
       }
     }
-    value += 2 * ntt_size;
+    prime_candidate += prime_candidate_step;
   }
 
   HEXL_CHECK(false, "Failed to find enough primes");

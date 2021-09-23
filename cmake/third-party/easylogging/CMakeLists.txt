@@ -3,10 +3,12 @@
 
 # Download and unpack easylogging at configure time
 set(CACHED_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-conversion -Wno-implicit-fallthrough")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-conversion -Wno-range-loop-construct -Wno-shadow")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-float-conversion -Wno-conversion")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning -Wno-unknown-warning-option")
+if (NOT HEXL_USE_MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-conversion -Wno-implicit-fallthrough")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-conversion -Wno-range-loop-construct -Wno-shadow")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-implicit-int-float-conversion -Wno-conversion")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-warning -Wno-unknown-warning-option")
+endif()
 
 configure_file(CMakeLists.txt.in easylogging-download/CMakeLists.txt)
 set(CONFIGURE_COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .)
@@ -45,7 +47,10 @@ set_target_properties(easyloggingpp PROPERTIES INCLUDE_DIRECTORIES
 
 install(
   TARGETS easyloggingpp
-  EXPORT HEXLTargets)
+  EXPORT HEXLTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(DIRECTORY ${EASYLOGGINGPP_INCLUDE_DIR}/
   DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}/
